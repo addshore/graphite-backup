@@ -2,20 +2,26 @@
 
 class GraphiteBackup {
 
-	public function execute( $targetInput ) {
-		$this->echoLine( "Getting $targetInput" );
+	public function execute( $targetInputs ) {
+		foreach( $targetInputs as $targetInput ) {
+			$this->executeTargetInput( $targetInput );
+		}
+	}
+
+	private function executeTargetInput( $targetInput ) {
+		$this->echoLine( " Getting $targetInput" );
 
 		$data = $this->getDataForTarget( $targetInput );
 
 		if ( empty( $data ) ) {
-			$this->echoLine( "Empty target, no backup made." );
+			$this->echoLine( "  Empty target, no backup made" );
 
 			return;
 		}
 
 		foreach ( $data as $targetData ) {
 			$metric = $targetData['target'];
-			$this->echoLine( "Backing up $metric" );
+			$this->echoLine( "  Backing up $metric" );
 			$dataPoints = $targetData['datapoints'];
 			$file = $this->getDataPath( $metric );
 
@@ -42,16 +48,14 @@ class GraphiteBackup {
 				$success = file_put_contents( $file, $stringToAdd, FILE_APPEND );
 				$dataPointsAdded++;
 				if ( $success === false ) {
-					$this->echoLine( "Failed to write to file." );
+					$this->echoLine( "   Failed to write to file" );
 					return;
 				}
 			}
 
 
-			$this->echoLine( "$dataPointsAdded new points, $dataPointsSkipped skipped points." );
+			$this->echoLine( "   $dataPointsAdded new points, $dataPointsSkipped skipped points" );
 		}
-
-		$this->echoLine( "Done." );
 	}
 
 	private function echoLine( $line ) {
