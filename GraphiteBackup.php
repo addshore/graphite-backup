@@ -1,45 +1,26 @@
 <?php
 
-namespace GraphiteBackup\Console\Command;
+class GraphiteBackup {
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class BackupCommand extends Command {
-
-	protected function configure() {
-		$this
-			->setName( 'backup' )
-			->setDescription( 'Back up a target into local files.' )
-			->addArgument(
-				'target',
-				InputArgument::REQUIRED,
-				'Which target do you want to backup?'
-			);
-	}
-
-	protected function execute( InputInterface $input, OutputInterface $output ) {
-		$targetInput = $input->getArgument( 'target' );
-		$output->writeln( "Getting $targetInput" );
+	public function execute( $targetInput ) {
+		$this->echoLine( "Getting $targetInput" );
 
 		$data = $this->getDataForTarget( $targetInput );
 
 		if ( empty( $data ) ) {
-			$output->writeln( "Empty target, no backup made." );
+			$this->echoLine( "Empty target, no backup made." );
 
 			return;
 		}
 
 		foreach ( $data as $targetData ) {
 			$metric = $targetData['target'];
-			$output->writeln( "Backing up $metric" );
+			$this->echoLine( "Backing up $metric" );
 			$dataPoints = $targetData['datapoints'];
 			$file = $this->getDataPath( $metric );
 
 			// Note: Loading this could start using lots of memory?
-			$currentFileContents = file_get_contents( $file );
+			$currentFileContents = @file_get_contents( $file );
 			if ( $currentFileContents === false ) {
 				$currentFileContents = '';
 			}
@@ -61,16 +42,20 @@ class BackupCommand extends Command {
 				$success = file_put_contents( $file, $stringToAdd, FILE_APPEND );
 				$dataPointsAdded++;
 				if ( $success === false ) {
-					$output->writeln( "Failed to write to file." );
+					$this->echoLine( "Failed to write to file." );
 					return;
 				}
 			}
 
 
-			$output->writeln( "$dataPointsAdded new points, $dataPointsSkipped skipped points." );
+			$this->echoLine( "$dataPointsAdded new points, $dataPointsSkipped skipped points." );
 		}
 
-		$output->writeln( "Done." );
+		$this->echoLine( "Done." );
+	}
+
+	private function echoLine( $line ) {
+		echo $line . "\n";
 	}
 
 	private function getDataPath( $metric ) {
@@ -78,7 +63,7 @@ class BackupCommand extends Command {
 	}
 
 	private function getDataDirectory() {
-		return dirname( dirname( dirname( __DIR__ ) ) ) .
+		return  __DIR__ .
 		DIRECTORY_SEPARATOR .
 		'data' .
 		DIRECTORY_SEPARATOR;
