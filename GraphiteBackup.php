@@ -38,8 +38,11 @@ class GraphiteBackup {
 				list( $value, $timestamp ) = $dataPoint;
 				$stringToAdd = $timestamp . ' ' . $value . "\n";
 
-				// Don't write the line if we already have an exact duplicate
-				if ( strpos( $currentFileContents, $stringToAdd ) !== false ) {
+				// Don't write the line if we already have an exact duplicate or it is null
+				if (
+					$value == '' ||
+					strpos( $currentFileContents, $stringToAdd ) !== false
+				) {
 					$dataPointsSkipped++;
 					continue;
 				}
