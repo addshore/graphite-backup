@@ -83,7 +83,7 @@ class GraphiteBackup {
 	}
 
 	private function getApiUrl( $target ) {
-		return "https://graphite.wikimedia.org/render/?target=$target&format=json";
+		return "https://graphite.wikimedia.org/render/?target=$target&format=json&from=-25y&to=now";
 	}
 
 }
